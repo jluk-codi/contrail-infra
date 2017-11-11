@@ -1,9 +1,14 @@
 class opencontrail_ci::server inherits opencontrail_ci::params {
   include ::opencontrail_ci::users
 
+  package { 'iptables':
+      provider => 'apt',
+  }
+
   class { '::firewall': }
   resources { 'firewall':
       purge => true,
+      require => Package['iptables'],
   }
 
   class { '::puppet':
