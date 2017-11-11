@@ -11,7 +11,6 @@
 # puppet modules with r10k. FIXME: change the post-receive hook
 # to run r10k for us.
 - hosts: "puppetmaster:!disabled"
-  connection: local
   tasks:
   - name: quit puppet agent until we finish the bootstrap process
     service:
@@ -33,6 +32,8 @@
       dest: /etc/puppetlabs/r10k/r10k.yaml
   - name: push checked out git repository to the location puppet expects
     command: git push /var/lib/puppet/puppet.git {{ current_branch }}:{{ puppet_environment }}
+    args:
+      chdir: ./contrail-infra
     become: true
     become_user: puppet
     register: git_push
@@ -71,7 +72,7 @@
       state: stopped
   - name: check if puppetdb certificate has been signed already
     shell: puppet cert list --all | grep -q '+ "{{ puppetdb_host }}"'
-    delegate_to: localhost
+    delegate_to: puppetmaster
     failed_when: false
     changed_when: false
     register: signed
@@ -91,11 +92,11 @@
     when: signed.rc != 0
     failed_when: puppetdb_hostname.stdout == ''
     register: puppetdb_hostname
-    delegate_to: localhost
+    delegate_to: puppetmaster
     changed_when: false
   - name: sign CSR sent by the puppetdb host
     command: puppet cert sign {{ puppetdb_hostname.stdout }}
-    delegate_to: localhost
+    delegate_to: puppetmaster
     when: signed.rc != 0 
   - name: ensure that puppet agent on puppetdb is stopped
     service:

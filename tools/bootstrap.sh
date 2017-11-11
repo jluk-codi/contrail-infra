@@ -85,5 +85,5 @@ if [ x"$1" == x"host" ] || [ x"$1" == x ]; then
     ansible-galaxy install -r roles.yaml --force
     # run ansible to finish the bootstrap process
     #rm -rf $HOME/.ansible/
-    ANSIBLE_SSH_PIPELINING=True ansible-playbook ${PROJECT_DIR}/playbooks/bootstrap_puppet.yaml --extra-vars "puppet_environment=$ENVIRONMENT puppetdb_host=${HOSTS[puppetdb]} puppetmaster_host=${HOSTS[puppetmaster]} current_branch=$CURRENT_BRANCH"
+    ANSIBLE_SSH_PIPELINING=True ansible-playbook -vvv ${PROJECT_DIR}/playbooks/bootstrap_puppet.yaml --extra-vars "puppet_environment=$ENVIRONMENT puppetdb_host=${HOSTS[puppetdb]} puppetmaster_host=${HOSTS[puppetmaster]} current_branch=$CURRENT_BRANCH"
 fi
