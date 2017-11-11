@@ -86,9 +86,16 @@ class opencontrail_ci::puppetmaster(
     eyaml_datadir => '/var/lib/puppet/hieradata/%{::environment}',
   }
 
+  package { 'python-crypto':
+    provider => 'apt',
+  }
+
   class { '::ansible':
     ansible_version => '2.2.2.0',
-    require         => Package['curl'],
+    require         => [
+      Package['curl'],
+      Package['python-crypto'],
+    ]
   }
 
   firewall { '100 accept tcp 8140 from everywhere':
