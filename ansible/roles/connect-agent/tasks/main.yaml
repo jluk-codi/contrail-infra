@@ -7,50 +7,6 @@
   tasks:
     - name: ensure that we can login to servers
       setup: {}
-# configure puppet environment for the master, and install all
-# puppet modules with r10k. FIXME: change the post-receive hook
-# to run r10k for us.
-- hosts: "puppetmaster:!disabled"
-  tasks:
-  - name: quit puppet agent until we finish the bootstrap process
-    service:
-      # disable puppet until we finish puppetdb, it will be started
-      # when we apply catalog at the end.
-      name: puppet
-      state: stopped
-  - name: Create /etc/puppetlabs/r10k/ hierarchy
-    file:
-      dest: /etc/puppetlabs/r10k/
-      state: directory
-      owner: puppet
-      group: puppet
-      mode: '0755'
-      recurse: true
-  - name: create skeleton r10k.yaml so that we can install modules
-    copy:
-      src: files/puppet/r10k.yaml
-      dest: /etc/puppetlabs/r10k/r10k.yaml
-  - name: push checked out git repository to the location puppet expects
-    command: git push /var/lib/puppet/puppet.git {{ current_branch }}:{{ puppet_environment }}
-    args:
-      chdir: ./contrail-infra
-    become: true
-    become_user: puppet
-    register: git_push
-    changed_when: '"Writing objects" in git_push.stdout'
-  - debug:
-      var: git_push
-  - name: ensure that /var/cache/r10k/ exists with correct permissions
-    file:
-      dest: /var/cache/r10k/
-      state: directory
-      owner: puppet
-      group: puppet
-  - name: install puppet modules for the environment
-    command: r10k deploy environment --puppetfile --verbose
-    become: true
-    become_user: puppet
-    when: git_push.changed
 # install puppet on puppetdb host, and sign the generated SSL certificate
 # on puppet master.
 - hosts: "puppetdb:!disabled"
@@ -61,11 +17,12 @@
       src: ../tools/install_puppet.sh
       dest: /root/install_puppet.sh
       mode: 0750
+    delegate_to: "{{ agent_host }}"
   - name: install puppet from puppetlabs repositories
     command: /root/install_puppet.sh
     args:
       creates: /usr/bin/puppet
-  - name: stop puppet agent on puppetdb
+  - name: stop puppet agent on {{ agent_host }}
     service:
     args:
       name: puppet

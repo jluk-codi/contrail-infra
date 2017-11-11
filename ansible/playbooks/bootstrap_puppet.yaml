@@ -58,7 +58,7 @@
   - name: copy puppet install script to the remote host
     copy:
     args:
-      src: ../tools/install_puppet.sh
+      src: ../../tools/install_puppet.sh
       dest: /root/install_puppet.sh
       mode: 0750
   - name: install puppet from puppetlabs repositories
