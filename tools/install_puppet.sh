@@ -204,7 +204,7 @@ EOF
         dpkg -i $puppet_deb
         rm $puppet_deb
 
-	DEBIAN_FRONTEND=noninteractive apt-get update
+        DEBIAN_FRONTEND=noninteractive apt-get update
 
         # ansible also requires python2 on the host to run correctly.
         # Make sure we have it, as some images come without it
@@ -296,6 +296,8 @@ function setup_pip {
 # single apt-get update for setup_pip and setup_puppet
 if is_ubuntu; then
     apt-get update
+    DEBIAN_FRONTEND=noninteractive apt-get --option 'Dpkg::Options::=--force-confold' \
+        --assume-yes install -y --force-yes curl
 fi
 
 if $SETUP_PIP; then
