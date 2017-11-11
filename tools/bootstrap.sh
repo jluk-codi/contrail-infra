@@ -60,24 +60,25 @@ if [ x"$1" == x"master" ] || [ x"$1" == x ]; then
       -e "class { '::opencontrail_ci::server': } -> class { 'opencontrail_ci::puppetmaster': puppetdb_enabled => false }"
 fi
 
-if [ x"$1" == x"host" ] then
+if [ x"$1" == x"host" ]; then
     # create /etc/ansible/hosts for bootstrap
     cat > /etc/ansible/hosts <<-EOF
-    [puppet]
-    puppetdb ansible_host=${HOSTS[puppetdb]} ansible_connection=docker
-    puppetmaster ansible_host=${HOSTS[puppetmaster]} ansible_connection=docker
-    EOF
+[puppet]
+puppetdb ansible_host=${HOSTS[puppetdb]} ansible_connection=docker
+puppetmaster ansible_host=${HOSTS[puppetmaster]} ansible_connection=docker
+EOF
+    ansible-playbook ${PROJECT_DIR}/playbooks/docker_puppetmaster_pre.yaml
 else
     if [ x"$1" == x ]; then
         # create /etc/ansible/hosts for bootstrap
         cat > /etc/ansible/hosts <<-EOF
-        [puppet]
-        puppetdb ansible_host=${HOSTS[puppetdb]} ansible_connection=local
-        puppetmaster ansible_host=${HOSTS[puppetmaster]}
-        EOF
+[puppet]
+puppetdb ansible_host=${HOSTS[puppetdb]}
+puppetmaster ansible_host=${HOSTS[puppetmaster]} ansible_connection=local
+EOF
     fi
 fi
-if [ x"$1" == x"host" ] || [ x"$1" == x ] then
+if [ x"$1" == x"host" ] || [ x"$1" == x ]; then
     # install required ansible roles
     ansible-galaxy install -r roles.yaml --force
     # run ansible to finish the bootstrap process

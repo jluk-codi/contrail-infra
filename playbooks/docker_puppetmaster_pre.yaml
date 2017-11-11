@@ -1,0 +1,8 @@
+- hosts: puppetmaster
+  tasks:
+    - name: send bootstrap script
+      synchronize:
+        src: ..
+        dest: .
+    - name: run bootstrap command
+      command: ./contrail-infra/tools/booststrap.sh master
