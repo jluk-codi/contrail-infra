@@ -67,7 +67,8 @@ if [ x"$1" == x"host" ]; then
 puppetdb ansible_host=${HOSTS[puppetdb]} ansible_connection=docker
 puppetmaster ansible_host=${HOSTS[puppetmaster]} ansible_connection=docker
 EOF
-    ansible-playbook -vv ${PROJECT_DIR}/playbooks/docker_puppetmaster_pre.yaml
+    cd "$PROJECT_DIR"/ansible
+    ansible-playbook -vv ${PROJECT_DIR}/ansible/playbooks/docker_puppetmaster_pre.yaml
 else
     if [ x"$1" == x ]; then
         # create /etc/ansible/hosts for bootstrap
@@ -80,10 +81,10 @@ EOF
     playbook_sudo="sudo -u ${SUDO_USER}"
 fi
 if [ x"$1" == x"host" ] || [ x"$1" == x ]; then
-    cd "$PROJECT_DIR"
+    cd "$PROJECT_DIR"/ansible
     # install required ansible roles
-    ansible-galaxy install -r roles.yaml --force
+    ansible-galaxy install -r ../roles.yaml --force
     # run ansible to finish the bootstrap process
     #rm -rf $HOME/.ansible/
-    ANSIBLE_SSH_PIPELINING=True ansible-playbook -vvv ${PROJECT_DIR}/playbooks/bootstrap_puppet.yaml --extra-vars "puppet_environment=$ENVIRONMENT puppetdb_host=${HOSTS[puppetdb]} puppetmaster_host=${HOSTS[puppetmaster]} current_branch=$CURRENT_BRANCH"
+    ANSIBLE_SSH_PIPELINING=True ansible-playbook -vvv ${PROJECT_DIR}/ansible/playbooks/bootstrap_puppet.yaml --extra-vars "puppet_environment=$ENVIRONMENT puppetdb_host=${HOSTS[puppetdb]} puppetmaster_host=${HOSTS[puppetmaster]} current_branch=$CURRENT_BRANCH"
 fi
