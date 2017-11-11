@@ -2,7 +2,9 @@
   tasks:
     - name: send bootstrap script
       synchronize:
-        src: ..
+        src: ../../contrail-infra
         dest: .
+    - command: ls
+    - command: pwd
     - name: run bootstrap command
-      command: ./contrail-infra/tools/booststrap.sh master
+      command: ./contrail-infra/tools/bootstrap.sh master
